@@ -1,0 +1,14 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Python files
+*.py linguist-language=Python
+
+# Documentation
+*.md linguist-documentation
+
+# Treat files as binary with no conversion
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary 
