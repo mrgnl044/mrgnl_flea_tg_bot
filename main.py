@@ -1,5 +1,5 @@
 """
-Главный файл телеграм-бота объявлений marginal_bot.
+Главный файл телеграм-бота объявлений Fixed Gear Perm.
 """
 
 import asyncio
@@ -13,7 +13,7 @@ async def main():
     """
     Главная функция запуска бота
     """
-    logger.info("Запуск бота marginal_bot")
+    logger.info("Запуск бота Fixed Gear Perm")
     
     # Регистрируем все обработчики
     register_all_handlers(dp)

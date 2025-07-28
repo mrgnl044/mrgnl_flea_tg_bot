@@ -1,5 +1,5 @@
 """
-Инициализация телеграм-бота marginal_bot.
+Инициализация телеграм-бота Fixed Gear Perm.
 """
 
 from aiogram import Bot, Dispatcher

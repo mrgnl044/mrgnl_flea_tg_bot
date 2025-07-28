@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    container_name: fixed-gear-perm-bot
+    restart: always
+    volumes:
+      - ./.env:/app/.env
+    networks:
+      - bot-network
+
+networks:
+  bot-network:
+    driver: bridge 

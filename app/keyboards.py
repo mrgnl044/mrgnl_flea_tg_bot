@@ -1,5 +1,5 @@
 """
-Клавиатуры для телеграм-бота объявлений marginal_bot.
+Клавиатуры для телеграм-бота объявлений Fixed Gear Perm.
 """
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup

@@ -1,5 +1,5 @@
 """
-Состояния FSM для телеграм-бота объявлений marginal_bot.
+Состояния FSM для телеграм-бота объявлений Fixed Gear Perm.
 """
 
 from aiogram.fsm.state import State, StatesGroup

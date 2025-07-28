@@ -1,5 +1,5 @@
 """
-Модуль обработчиков для телеграм-бота объявлений marginal_bot.
+Модуль обработчиков для телеграм-бота объявлений Fixed Gear Perm.
 """
 
 from . import start, create_ad, moderation, user_actions
