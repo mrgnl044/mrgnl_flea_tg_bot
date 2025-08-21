@@ -3,6 +3,27 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Virtual environments
+.env
+.venv/
+venv/
+
+# Local DB and data
+bot_data.db
+data/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+watch_*
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
 # C extensions
 *.so
 

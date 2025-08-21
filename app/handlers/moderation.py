@@ -9,6 +9,7 @@ from ..bot import bot, dp
 from ..config import CHANNEL_ID
 from ..utils import create_ad_text, create_media_group
 from ..keyboards import get_sold_keyboard, get_create_new_ad_keyboard
+from ..database import db
 
 logger = logging.getLogger(__name__)
 
@@ -30,14 +31,14 @@ async def approve_ad(callback: types.CallbackQuery):
     """
     await callback.answer()
     
-    # Извлекаем ID пользователя из callback_data
-    user_id = callback.data.split("_")[1]
+    # Извлекаем ID объявления из callback_data
+    ad_id = int(callback.data.split("_")[1])
     
-    # Получаем данные объявления из хранилища
-    ad_data = await dp.storage.get_data(key=f"ad_{user_id}")
+    # Получаем данные объявления из базы данных
+    ad_data = db.get_moderation_ad(ad_id)
     
     if not ad_data:
-        await callback.message.reply("🧩 Досадное недоразумение: данные об объявлении бесследно исчезли из системы! Возможно, автор передумал или произошла техническая ошибка.")
+        await callback.message.reply("Данные объявления не найдены!")
         return
     
     # Формируем текст объявления для публикации в канале
@@ -58,26 +59,39 @@ async def approve_ad(callback: types.CallbackQuery):
     # Отправляем уведомление автору объявления
     try:
         await bot.send_message(
-            chat_id=int(user_id),
+            chat_id=ad_data['user_id'],
             text=(
-                "✅ <b>Отличные новости! Ваше объявление одобрено!</b>\n\n"
-                "Оно уже опубликовано в нашем канале и теперь доступно всем участникам сообщества. "
-                "Когда товар будет продан, не забудьте отметить это, нажав на кнопку «Товар обрёл нового владельца» ниже."
+                "✅ <b>Объявление одобрено!</b>\n\n"
+                "🎉 <i>Оно опубликовано в канале.</i> Когда продашь - нажми <u>«Продано»</u>"
             ),
             reply_markup=get_sold_keyboard(channel_msg_id),
             parse_mode="HTML"
         )
     except Exception as e:
-        logger.error(f"Не удалось отправить уведомление пользователю {user_id}: {e}")
+        logger.error(f"Не удалось отправить уведомление пользователю {ad_data['user_id']}: {e}")
     
     # Обновляем сообщение в чате модерации
     await callback.message.edit_text(
-        f"{callback.message.text}\n\n✅ ОДОБРЕНО модератором {callback.from_user.first_name}",
+        f"{callback.message.text}\n\n✅ ОДОБРЕНО",
         reply_markup=None
     )
     
-    # Удаляем данные объявления из хранилища
-    await dp.storage.set_data(key=f"ad_{user_id}", data={})
+    # Сохраняем объявление в базу данных как опубликованное
+    published_ad_id = db.save_published_ad(
+        ad_data['user_id'], 
+        ad_data, 
+        channel_msg_id, 
+        int(CHANNEL_ID)
+    )
+    
+    # Обновляем статус модерации
+    db.update_moderation_status(
+        ad_id, 
+        'approved', 
+        callback.from_user.id,
+        callback.message.message_id,
+        callback.message.chat.id
+    )
 
 async def reject_ad(callback: types.CallbackQuery):
     """
@@ -87,36 +101,41 @@ async def reject_ad(callback: types.CallbackQuery):
     """
     await callback.answer()
     
-    # Извлекаем ID пользователя из callback_data
-    user_id = callback.data.split("_")[1]
+    # Извлекаем ID объявления из callback_data
+    ad_id = int(callback.data.split("_")[1])
     
-    # Получаем данные объявления из хранилища
-    ad_data = await dp.storage.get_data(key=f"ad_{user_id}")
+    # Получаем данные объявления из базы данных
+    ad_data = db.get_moderation_ad(ad_id)
     
     if not ad_data:
-        await callback.message.reply("🧩 К сожалению, данные объявления не найдены. Возможно, запись была удалена из системы.")
+        await callback.message.reply("Данные объявления не найдены.")
         return
     
     # Отправляем уведомление автору объявления
     try:
         await bot.send_message(
-            chat_id=int(user_id),
+            chat_id=ad_data['user_id'],
             text=(
-                "⚠️ <b>Ваше объявление не прошло модерацию</b>\n\n"
-                "К сожалению, модераторы отклонили ваше объявление. Возможные причины: недостаточное качество фотографий, неполное описание, некорректная цена или другие несоответствия правилам сообщества.\n\n"
-                "Вы можете создать новое объявление, улучшив качество материалов и информации. Удачи в следующей попытке!"
+                "❌ <b>Объявление отклонено</b>\n\n"
+                "🔄 <i>Создай новое объявление с лучшими фото и описанием.</i>"
             ),
             reply_markup=get_create_new_ad_keyboard(),
             parse_mode="HTML"
         )
     except Exception as e:
-        logger.error(f"Не удалось отправить уведомление пользователю {user_id}: {e}")
+        logger.error(f"Не удалось отправить уведомление пользователю {ad_data['user_id']}: {e}")
     
     # Обновляем сообщение в чате модерации
     await callback.message.edit_text(
-        f"{callback.message.text}\n\n❌ ОТКЛОНЕНО модератором {callback.from_user.first_name}",
+        f"{callback.message.text}\n\n❌ ОТКЛОНЕНО",
         reply_markup=None
     )
     
-    # Удаляем данные объявления из хранилища
-    await dp.storage.set_data(key=f"ad_{user_id}", data={}) 
+    # Обновляем статус модерации
+    db.update_moderation_status(
+        ad_id, 
+        'rejected', 
+        callback.from_user.id,
+        callback.message.message_id,
+        callback.message.chat.id
+    ) 

@@ -7,6 +7,25 @@ from aiogram.types import InputMediaPhoto
 
 logger = logging.getLogger(__name__)
 
+def get_category_name(category_code: str) -> str:
+    """
+    Получает название категории по коду
+    
+    :param category_code: Код категории
+    :return: Название категории с хештегом
+    """
+    categories = {
+        "sell": "#продам",
+        "buy": "#куплю", 
+        "trade": "#обмен",
+        "rent": "#аренда",
+        "free": "#даром",
+        "service": "#услуги",
+        "race": "#гонка",
+        "event": "#мероприятие"
+    }
+    return categories.get(category_code, "#другое")
+
 def format_price(price_text: str) -> str:
     """
     Форматирует цену с разделителями тысяч
@@ -14,6 +33,10 @@ def format_price(price_text: str) -> str:
     :param price_text: Текст с ценой
     :return: Отформатированная цена
     """
+    # Проверяем на "Даром"
+    if price_text.strip().lower() in ["даром", "бесплатно", "free"]:
+        return "Даром"
+    
     try:
         price = int(price_text.replace(" ", ""))
         if price <= 0:
@@ -48,7 +71,11 @@ def create_ad_text(data, is_moderation=False):
     :param is_moderation: Флаг, указывающий на создание текста для модерации
     :return: Текст объявления
     """
+    # Получаем категорию
+    category = get_category_name(data.get('category', 'sell'))
+    
     text = (
+        f"{category}\n"
         f"🚲 <b>{data['title']}</b>\n\n"
         f"📌 {data['description']}\n"
         f"💰 Цена: {data['price']}\n"
@@ -58,7 +85,7 @@ def create_ad_text(data, is_moderation=False):
     if is_moderation:
         text += f"От пользователя: {data['user_mention']}"
     else:
-        text += "Создать объяву: @fgpmarket_bot"
+        text += "Создать объяву: @fgp_mrktbot"
     
     return text
 

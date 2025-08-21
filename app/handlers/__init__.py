@@ -12,6 +12,10 @@ def register_all_handlers(dp):
     
     :param dp: Диспетчер
     """
+    # Сначала регистрируем глобальные обработчики
+    from .create_ad import go_to_start
+    dp.callback_query.register(go_to_start, lambda c: c.data == "start_command")
+    
     handlers = [
         start,
         create_ad,
