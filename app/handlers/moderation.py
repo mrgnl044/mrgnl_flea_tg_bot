@@ -51,10 +51,18 @@ async def approve_ad(callback: types.CallbackQuery):
     if photos:
         # Создаем группу медиа для публикации в канале
         media_group = create_media_group(photos, post_text, "HTML")
-        
+
         # Отправляем группу фотографий в канал
         channel_msgs = await bot.send_media_group(chat_id=CHANNEL_ID, media=media_group)
         channel_msg_id = channel_msgs[0].message_id
+    else:
+        # Если фотографий нет, публикуем текстовое сообщение
+        channel_msg = await bot.send_message(
+            chat_id=CHANNEL_ID,
+            text=post_text,
+            parse_mode="HTML"
+        )
+        channel_msg_id = channel_msg.message_id
     
     # Отправляем уведомление автору объявления
     try:
