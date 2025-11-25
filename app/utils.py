@@ -85,8 +85,8 @@ def create_ad_text(data, is_moderation=False):
     if is_moderation:
         text += f"От пользователя: {data['user_mention']}"
     else:
-        text += "Создать объяву: @fgp_mrktbot"
-    
+        text += "Создать объяву: <a href=\"https://t.me/fgpmarket\">@fgpmarket</a>"
+
     return text
 
 def create_media_group(photos, caption=None, parse_mode=None):
@@ -104,4 +104,4 @@ def create_media_group(photos, caption=None, parse_mode=None):
             media_group.append(InputMediaPhoto(media=photo_id, caption=caption, parse_mode=parse_mode))
         else:
             media_group.append(InputMediaPhoto(media=photo_id))
-    return media_group 
+    return media_group
